@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardViewId"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textViewPackId"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:layout_alignParentTop="true"
+                android:layout_toStartOf="@+id/textViewStatus"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/textViewStatus"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/textViewPackSize"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:layout_alignStart="@+id/textViewPackId"
+                android:layout_below="@+id/textViewPackId"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/textViewDeliveryDate"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignStart="@+id/textViewPackSize"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="Id" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/textView8"
+                android:text="Size" />
+
+            <TextView
+                android:id="@+id/textView10"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_alignEnd="@+id/textView9"
+                android:layout_below="@+id/textViewPackSize"
+                android:text="Delivery Date" />
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>

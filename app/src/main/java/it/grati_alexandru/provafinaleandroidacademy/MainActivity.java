@@ -1,5 +1,10 @@
 package it.grati_alexandru.provafinaleandroidacademy;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +14,21 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import cz.msebera.android.httpclient.Header;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Client;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
+import it.grati_alexandru.provafinaleandroidacademy.Model.User;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.DateConversion;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
 public class MainActivity extends AppCompatActivity implements ResponseController {
@@ -16,14 +36,20 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     private TextView editTextLastName;
     private TextView editTextUsername;
     private TextView editTextPassword;
+    private TextView textViewBack;
     private RadioGroup radioGroup;
     private Button bLogin;
     private boolean existsEmptyField;
+    private String savedUser;
     private String username;
     private String password;
     private String firstName;
     private String lastName;
     private String warning;
+    private int chekedbuttonId;
+    private SharedPreferences sharedPreferences;
+    private ResponseController responseController;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,16 +62,25 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         editTextPassword = findViewById(R.id.editTextPassword);
         radioGroup = findViewById(R.id.radioGroup);
         bLogin = findViewById(R.id.bLogin);
+        textViewBack = findViewById(R.id.textViewBack);
 
+        responseController = this;
+        progressDialog = new ProgressDialog(MainActivity.this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        savedUser = sharedPreferences.getString("USER","");
     }
 
     public void onLoginButtonClicked(View view){
         if(editTextFirstName.getVisibility() == View.GONE){
-            warning = checkEmptyFields();
             username = editTextUsername.getText().toString();
             password = editTextPassword.getText().toString();
+            chekedbuttonId = radioGroup.getCheckedRadioButtonId();
+            warning = checkEmptyFields();
             if(!existsEmptyField){
-                Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
+                progressDialog.setTitle("Checking data...");
+                progressDialog.show();
+                validateData();
             }else{
                 Toast.makeText(getApplicationContext(), warning, Toast.LENGTH_SHORT).show();
             }
@@ -56,62 +91,157 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         if(editTextFirstName.getVisibility() == View.GONE) {
             editTextFirstName.setVisibility(View.VISIBLE);
             editTextLastName.setVisibility(View.VISIBLE);
-            radioGroup.setVisibility(View.VISIBLE);
-            bLogin.setVisibility(View.INVISIBLE);
+            textViewBack.setVisibility(View.VISIBLE);
+            bLogin.setVisibility(View.GONE);
         }else{
+            username = editTextUsername.getText().toString();
+            password = editTextPassword.getText().toString();
+            firstName = editTextFirstName.getText().toString();
+            lastName = editTextLastName.getText().toString();
+            chekedbuttonId = radioGroup.getCheckedRadioButtonId();
             warning = checkEmptyFields();
+
             if(!existsEmptyField){
+                progressDialog.setTitle("Checking data...");
+                progressDialog.show();
+                registerUser();
+                responseController.respondOnRecevedData();
                 Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
             }else{
                 Toast.makeText(getApplicationContext(), warning, Toast.LENGTH_SHORT).show();
             }
-
         }
+    }
+
+    public void onBackClicked(View v){
+        editTextFirstName.setVisibility(View.GONE);
+        editTextLastName.setVisibility(View.GONE);
+        bLogin.setVisibility(View.VISIBLE);
+        textViewBack.setVisibility(View.GONE);
     }
 
     @Override
     public void respondOnRecevedData() {
-
+        if(progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog.cancel();
+        }
     }
 
     public String checkEmptyFields(){
-        String warning = "";
         existsEmptyField = false;
+
+        if(radioGroup.getVisibility() == View.VISIBLE && chekedbuttonId == -1 ){
+            existsEmptyField = true;
+            return "Select acount type";
+        }
 
         if(editTextFirstName.getVisibility() == View.VISIBLE && firstName.equals("")){
             existsEmptyField = true;
-            if(warning.equals("")){
-                warning = "Insert First Name";
-            }
+                return "Insert First Name";
         }
 
         if(editTextLastName.getVisibility() == View.VISIBLE && lastName.equals("")){
             existsEmptyField = true;
-            if(warning.equals("")){
-                warning = "Insert Last Name";
-            }else{
-                warning = warning + ", last name";
-            }
+            return "Insert Last Name";
         }
 
         if(editTextUsername.getVisibility() == View.VISIBLE && username.equals("")){
             existsEmptyField = true;
-            if(warning.equals("")){
-                warning = "Insert username,";
-            }else{
-                warning = warning + ", username";
-            }
+            return "Insert Username";
         }
 
         if(editTextPassword.getVisibility() == View.VISIBLE && password.equals("")){
             existsEmptyField = true;
-            if(warning.equals("")){
-                warning = "Insert password";
-            }else{
-                warning = warning + ", password";
-            }
+            return "Insert Password";
         }
-        return  warning;
+        return  "";
+    }
+
+    public void validateData(){
+        String urlElem = setUrlElement();
+        String url = "Users/"+urlElem+"/"+username+"/Password";
+        FirebaseRestRequests.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                if(statusCode == 200) {
+                    String response = new String(responseBody);
+                    if(!response.equals("null")){
+                        response = parsePassword(response);
+                        if(response.equals(password)){
+                            saveUserToPreferences();
+                            loginUser();
+                            Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
+                        }else {
+                            Toast.makeText(getApplicationContext(), "Wrong Password", Toast.LENGTH_SHORT).show();
+                        }
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Wrong Username", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                responseController.respondOnRecevedData();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if(statusCode >= 400 && statusCode < 500){
+                    Toast.makeText(getApplicationContext(), "Server Unavailable", Toast.LENGTH_SHORT).show();
+                }
+                responseController.respondOnRecevedData();
+            }
+        });
+
+    }
+
+    public void loginUser(){
+        Intent intent = new Intent(getApplicationContext(),BottomNavigationActivity.class);
+        startActivity(intent);
+    }
+
+    public void registerUser(){
+        String urlElem = setUrlElement();
+        String url = FirebaseRestRequests.BASE_URL + "Users/"+urlElem;
+
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference databaseLastModDate = firebaseDatabase.getReferenceFromUrl(url);
+        databaseLastModDate.child("LastRegistration").setValue(DateConversion.formatDateToString(new Date()));
+
+        DatabaseReference databaseReference = firebaseDatabase.getReferenceFromUrl(url);
+        databaseReference.child(username).child("FirstName").setValue(firstName);
+        databaseReference.child(username).child("LastName").setValue(lastName);
+        databaseReference.child(username).child("Password").setValue(password);
+
+        User user;
+        if(urlElem.equals("Clients")){
+            user = new Client(firstName,lastName,username,password, new ArrayList<Package>());
+        }else{
+            user = new Courier(firstName,lastName,username,password, new ArrayList<Package>());
+        }
+        SharedPreferences.Editor  editor = sharedPreferences.edit();
+        editor.putString("USER",username);
+        editor.apply();
+        FileOperations.writeObject(getApplicationContext(),"USER",user);
+    }
+
+    public String parsePassword(String password){
+        int length = password.length();
+        if(password.charAt(0) == '"' && password.charAt(length-1) == '"'){
+            return password.substring(1,length-1);
+        }
+        return  password;
+    }
+
+    public void saveUserToPreferences(){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("USER",username);
+        editor.apply();
+    }
+
+    public String setUrlElement(){
+        View v = radioGroup;
+        RadioButton radioButton = v.findViewById(chekedbuttonId);
+        if(radioButton.getText().toString().equals("Client"))
+            return  "Clients";
+        else return "Couriers";
     }
 }
-

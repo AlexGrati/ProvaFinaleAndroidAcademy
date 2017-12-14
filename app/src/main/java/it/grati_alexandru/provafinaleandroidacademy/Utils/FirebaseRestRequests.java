@@ -9,7 +9,7 @@ import com.loopj.android.http.RequestParams;
  */
 
 public class FirebaseRestRequests {
-    public static final String BASE_URL = "";
+    public static final String BASE_URL = "https://provafinaleandroidacademy.firebaseio.com/";
     private static final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
 
     private FirebaseRestRequests(){}
