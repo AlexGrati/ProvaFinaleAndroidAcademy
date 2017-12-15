@@ -32,10 +32,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
         public CardHolder(View v, final Context context){
             super(v);
             cardView = v.findViewById(R.id.cardViewId);
+            tPackId = v.findViewById(R.id.textViewPackId);
+            tDeliveryDate = v.findViewById(R.id.textViewDeliveryDate);
             tPackSize = v.findViewById(R.id.textViewPackSize);
             tPackStatus = v.findViewById(R.id.textViewStatus);
-            tDeliveryDate = v.findViewById(R.id.textViewDeliveryDate);
-            tPackId = v.findViewById(R.id.textViewPackId);
+
             this.context = context;
 
             cardView.setOnClickListener(new View.OnClickListener() {
@@ -63,14 +64,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
     public CardHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.package_card_item, parent,false);
 
-        CardHolder cardHolder = new CardHolder(v,parent.getContext());
+        CardHolder cardHolder = new CardHolder(v,context);
         return cardHolder;
     }
 
     @Override
     public void onBindViewHolder(CardHolder holder, int position) {
         p = packageList.get(position);
-        holder.tPackId.setText(p.getId());
+        holder.tPackId.setText(""+p.getId());
         holder.tDeliveryDate.setText(DateConversion.formatDateToString(p.getDeliveryDate()));
         holder.tPackStatus.setText(p.getStatus());
         holder.tPackSize.setText(p.getSize());

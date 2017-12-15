@@ -15,11 +15,17 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
+import it.grati_alexandru.provafinaleandroidacademy.Fragments.CourierFragment;
 import it.grati_alexandru.provafinaleandroidacademy.Fragments.PackageFragment;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Client;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
@@ -45,6 +51,8 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
     private List<Package> packageList;
     private String type;
     private Context context;
+    private Gson gson;
+    private List<Courier> courierList;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -58,11 +66,54 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
                     fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
                     return true;
                 case R.id.navigation_dashboard:
+                    checkCourierList();
                     return true;
             }
             return false;
         }
     };
+
+    public void checkCourierList(){
+        gson = new Gson();
+        String json = sharedPreferences.getString("COURIER_LIST","");
+        Type type = new TypeToken<List<Courier>>(){}.getType();
+        courierList = gson.fromJson(json,type);
+        if(courierList == null){
+            getAllCouriersFormFirebase();
+        }else{
+            fragmentTransaction.replace(R.id.baseFrameLayout,new CourierFragment()).commit();
+        }
+    }
+
+    public void getAllCouriersFormFirebase(){
+        progressDialog.setTitle("Loading Data..");
+        progressDialog.show();
+        String url = "Users/Couriers";
+        FirebaseRestRequests.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                if(statusCode == 200){
+                    String response = new String(responseBody);
+                    List<Courier> courierList = DataParser.cerateCourierList(response);
+                    courierList.size();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    String jsString = gson.toJson(courierList);
+                    editor.putString("COURIER_LIST",jsString);
+                    editor.apply();
+                    fragmentTransaction.replace(R.id.baseFrameLayout,new CourierFragment()).commit();
+                }
+                responseController.respondOnRecevedData();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if(statusCode >= 400 && statusCode <500){
+                    Toast.makeText(getApplicationContext(), "Server Unavailable", Toast.LENGTH_SHORT).show();
+                }
+                responseController.respondOnRecevedData();
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +122,17 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         user = (User) FileOperations.readObject(getApplicationContext(),"USER");
+        type = sharedPreferences.getString("TYPE","");
+        progressDialog = new ProgressDialog(BottomNavigationActivity.this);
+        responseController = this;
+
         if(user != null && user.getPackageList().size() > 0){
             packageList = user.getPackageList();
+            fragmentManager = getSupportFragmentManager();
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
         }else {
             if(type.equals("Couriers"))
                 user = new Courier();
@@ -88,12 +146,14 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
         FirebaseRestRequests.get(url, null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                List<Package> tempPackageList;
-                String response = new String(responseBody);
-                tempPackageList = DataParser.createPackageListFromId(response, packageIdList);
-                tempPackageList.size();
-                user.setPackageList(tempPackageList);
-                FileOperations.writeObject(getApplicationContext(),"USER", user);
+                if(statusCode == 200) {
+                    List<Package> tempPackageList;
+                    String response = new String(responseBody);
+                    tempPackageList = DataParser.createPackageListFromId(response, packageIdList);
+                    tempPackageList.size();
+                    user.setPackageList(tempPackageList);
+                    FileOperations.writeObject(getApplicationContext(), "USER", user);
+                }
             }
 
             @Override
@@ -132,12 +192,16 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
             }
         });
     }
+
     @Override
     public void respondOnRecevedData() {
+        if(user == null){
+            fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
+        }
+
         if(progressDialog != null) {
             progressDialog.dismiss();
             progressDialog.cancel();
         }
     }
-
 }

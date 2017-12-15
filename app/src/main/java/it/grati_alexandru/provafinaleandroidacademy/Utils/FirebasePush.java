@@ -24,6 +24,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import it.grati_alexandru.provafinaleandroidacademy.MainActivity;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
+import it.grati_alexandru.provafinaleandroidacademy.PackageActivity;
 import it.grati_alexandru.provafinaleandroidacademy.R;
 
 /**
@@ -33,7 +35,7 @@ import it.grati_alexandru.provafinaleandroidacademy.R;
 public class FirebasePush extends Service {
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private String url = "https://servicetestrun.firebaseio.com/Communities";
+    private String url = FirebaseRestRequests.BASE_URL;
     private DatabaseReference usersReference = database.getReferenceFromUrl(url);
     private ChildEventListener handler;
 
@@ -60,8 +62,9 @@ public class FirebasePush extends Service {
     public void onCreate() {
         super.onCreate();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String username = sharedPreferences.getString("USERNAME","");
-        url = url +"/Users/"+ username;
+        String username = sharedPreferences.getString("USER","");
+        final String type = sharedPreferences.getString("TYPE","");
+        url = url +"/Users/"+type+"/"+ username + "/Packages";
         usersReference = database.getReferenceFromUrl(url);
 
         handler = new ChildEventListener() {
@@ -69,13 +72,16 @@ public class FirebasePush extends Service {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.i("FIREBASE_SERVICE", "ADD: " + dataSnapshot.getKey());
+                if(type.equals("Couriers") && dataSnapshot.exists()){
+                    activePushValidation(""+dataSnapshot.getKey(), "Child Added");
+                }
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Log.i("FIREBASE_SERVICE", "CHANGE: " + dataSnapshot.getKey());
-                if (dataSnapshot.exists()) {
-                    activePushValidation(""+dataSnapshot.getKey());
+                if (type.equals("Clients") && dataSnapshot.exists()) {
+                    activePushValidation(""+dataSnapshot.getKey(), "Child Modified");
                 }
             }
 
@@ -99,9 +105,9 @@ public class FirebasePush extends Service {
         usersReference.addChildEventListener(handler);
     }
 
-    public void activePushValidation(String commListener) {
-        Intent intent = new Intent(this, MainActivity.class);
-        sendNotification(intent, "Nuovo post", commListener);
+    public void activePushValidation(String commListener, String text) {
+        Intent intent = new Intent(this, PackageActivity.class);
+        sendNotification(intent, text, commListener);
     }
 
     public void sendNotification(Intent intent, String title, String body) {

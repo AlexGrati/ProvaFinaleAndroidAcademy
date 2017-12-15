@@ -1,63 +1,51 @@
 package it.grati_alexandru.provafinaleandroidacademy.Fragments;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
+import java.lang.reflect.Type;
 import java.util.List;
 
-import cz.msebera.android.httpclient.Header;
-import it.grati_alexandru.provafinaleandroidacademy.Model.Client;
+import it.grati_alexandru.provafinaleandroidacademy.CourierRecyclerAdapter;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
-import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
 import it.grati_alexandru.provafinaleandroidacademy.Model.User;
 import it.grati_alexandru.provafinaleandroidacademy.R;
 import it.grati_alexandru.provafinaleandroidacademy.RecyclerAdapter;
-import it.grati_alexandru.provafinaleandroidacademy.Utils.DataParser;
-import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
-import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
-import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link PackageFragment.OnFragmentInteractionListener} interface
+ * {@link CourierFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link PackageFragment#newInstance} factory method to
+ * Use the {@link CourierFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class CourierFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private RecyclerView recyclerView;
-    private RecyclerAdapter recyclerAdapter;
+    private CourierRecyclerAdapter recyclerAdapter;
     private User user;
     private LinearLayoutManager linearLayoutManager;
     private SharedPreferences sharedPreferences;
-    private ResponseController responseController;
-    private ProgressDialog progressDialog;
-    private Package aPackage;
-    private String savedUser;
-    private List<Package> packageList;
-    private String type;
-
-
+    private Gson gson;
+    private List<Courier> courierList;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -65,7 +53,7 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private OnFragmentInteractionListener mListener;
 
-    public PackageFragment() {
+    public CourierFragment() {
         // Required empty public constructor
     }
 
@@ -75,11 +63,11 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment PackageFragment.
+     * @return A new instance of fragment CourierFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static PackageFragment newInstance(String param1, String param2) {
-        PackageFragment fragment = new PackageFragment();
+    public static CourierFragment newInstance(String param1, String param2) {
+        CourierFragment fragment = new CourierFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -94,22 +82,29 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        user = (User) FileOperations.readObject(getContext(),"USER");
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        gson = new Gson();
+        String json = sharedPreferences.getString("COURIER_LIST","");
+        Type type = new TypeToken<List<Courier>>(){}.getType();
+        courierList = gson.fromJson(json,type);
+        Log.i("TAG", "1 "+courierList.size());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_package, container, false);
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_courier, container, false);
 
-        recyclerView = view.findViewById(R.id.recyclerViewId);
+        Log.i("TAG", "1 "+courierList.size());
+
+        recyclerView = view.findViewById(R.id.rViewCourier);
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        recyclerAdapter = new RecyclerAdapter(getContext(),  user.getPackageList());
+        recyclerAdapter = new CourierRecyclerAdapter(getContext(), courierList);
         recyclerView.setAdapter(recyclerAdapter);
-
-        // Inflate the layout for this fragment
         return  view;
     }
 
@@ -126,7 +121,7 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(getContext(), "PackageFragment", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "CourierFragment", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -149,10 +144,5 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
-    }
-
-    @Override
-    public void onRefresh() {
-
     }
 }

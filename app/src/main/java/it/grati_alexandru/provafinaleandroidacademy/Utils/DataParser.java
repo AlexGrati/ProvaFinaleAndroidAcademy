@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
 
 /**
@@ -32,6 +34,41 @@ public class DataParser {
         return packageIdList;
     }
 
+    public static List<Courier> cerateCourierList(String jsonResponse){
+        List<Courier> courierList = new ArrayList<>();
+            try{
+                JSONObject courierObject = new JSONObject(jsonResponse);
+                Iterator iterator = courierObject.keys();
+                while (iterator.hasNext()){
+                    String key = (String) iterator.next();
+                    JSONObject courier = courierObject.getJSONObject(key);
+                    Iterator courierIterator = courier.keys();
+                    Courier c = new Courier();
+                    while (courierIterator.hasNext()){
+                        String data = (String) courierIterator.next();
+                        String val = courier.getString(data);
+
+                        switch (data){
+                            case "FirstName":
+                                c.setFirstName(val);
+                                break;
+                            case  "LastName":
+                                c.setLastName(val);
+                                break;
+                        }
+
+                        if(c.getUsername() == null){
+                            c.setUsername(key);
+                        }
+                    }
+                    courierList.add(c);
+                }
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        return courierList;
+    }
+
     public static List<Package> createPackageListFromId(String jsonResponse, List<Integer> idList){
         List<Package> packageList = new ArrayList<>();
         try{
@@ -56,7 +93,7 @@ public class DataParser {
                         case "CourierUsername":
                             p.setCourierUsername(val);
                             break;
-                        case "DeliveryAddress":
+                        case "DeliveryAddres":
                             p.setClientAddress(val);
                             break;
                         case "DeliveryDate":
