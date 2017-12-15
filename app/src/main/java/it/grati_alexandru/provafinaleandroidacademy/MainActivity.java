@@ -26,6 +26,7 @@ import it.grati_alexandru.provafinaleandroidacademy.Model.Client;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
 import it.grati_alexandru.provafinaleandroidacademy.Model.User;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.DataParser;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.DateConversion;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     private SharedPreferences sharedPreferences;
     private ResponseController responseController;
     private ProgressDialog progressDialog;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +69,13 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         responseController = this;
         progressDialog = new ProgressDialog(MainActivity.this);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = sharedPreferences.edit();
 
         savedUser = sharedPreferences.getString("USER","");
+
+        if(!savedUser.equals("")){
+            loginUser();
+        }
     }
 
     public void onLoginButtonClicked(View view){
@@ -167,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
                 if(statusCode == 200) {
                     String response = new String(responseBody);
                     if(!response.equals("null")){
-                        response = parsePassword(response);
+                        response = DataParser.parseString(response);
                         if(response.equals(password)){
                             saveUserToPreferences();
                             loginUser();
@@ -217,22 +224,13 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         }else{
             user = new Courier(firstName,lastName,username,password, new ArrayList<Package>());
         }
-        SharedPreferences.Editor  editor = sharedPreferences.edit();
         editor.putString("USER",username);
         editor.apply();
         FileOperations.writeObject(getApplicationContext(),"USER",user);
-    }
-
-    public String parsePassword(String password){
-        int length = password.length();
-        if(password.charAt(0) == '"' && password.charAt(length-1) == '"'){
-            return password.substring(1,length-1);
-        }
-        return  password;
+        loginUser();
     }
 
     public void saveUserToPreferences(){
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("USER",username);
         editor.apply();
     }
@@ -240,8 +238,12 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     public String setUrlElement(){
         View v = radioGroup;
         RadioButton radioButton = v.findViewById(chekedbuttonId);
+        String type = "";
         if(radioButton.getText().toString().equals("Client"))
-            return  "Clients";
-        else return "Couriers";
+            type = "Clients";
+        else type = "Couriers";
+        editor.putString("TYPE",type);
+        editor.apply();
+        return type;
     }
 }

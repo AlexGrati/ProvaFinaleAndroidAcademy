@@ -1,14 +1,36 @@
 package it.grati_alexandru.provafinaleandroidacademy.Fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpResponseHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Client;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
+import it.grati_alexandru.provafinaleandroidacademy.Model.User;
 import it.grati_alexandru.provafinaleandroidacademy.R;
+import it.grati_alexandru.provafinaleandroidacademy.RecyclerAdapter;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.DataParser;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,11 +40,25 @@ import it.grati_alexandru.provafinaleandroidacademy.R;
  * Use the {@link PackageFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PackageFragment extends Fragment {
+public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private RecyclerView recyclerView;
+    private RecyclerAdapter recyclerAdapter;
+    private User user;
+    private LinearLayoutManager linearLayoutManager;
+    private SharedPreferences sharedPreferences;
+    private ResponseController responseController;
+    private ProgressDialog progressDialog;
+    private Package aPackage;
+    private String savedUser;
+    private List<Package> packageList;
+    private String type;
+    private Context context;
+
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -64,8 +100,16 @@ public class PackageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_package, container, false);
+        recyclerView = view.findViewById(R.id.recyclerViewId);
+        linearLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(linearLayoutManager);
+        user = (User) FileOperations.readObject(getContext(),"USER");
+        recyclerAdapter = new RecyclerAdapter(getActivity(),  user.getPackageList());
+        recyclerView.setAdapter(recyclerAdapter);
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_package, container, false);
+        return  view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -81,8 +125,7 @@ public class PackageFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            Toast.makeText(getContext(), "PackageFragment", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -105,5 +148,10 @@ public class PackageFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onRefresh() {
+
     }
 }

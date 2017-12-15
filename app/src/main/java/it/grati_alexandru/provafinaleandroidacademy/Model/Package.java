@@ -15,10 +15,12 @@ public class Package implements Serializable {
     private String warehouseAddress;
     private String clientAddress;
     private String size;
+    private String status;
     private Date deliveryDate;
 
     public Package() {
         this.id = 0;
+        this.status = null;
         this.clientUsername = null;
         this.courierUsername = null;
         this.clientName = null;
@@ -28,7 +30,7 @@ public class Package implements Serializable {
         this.deliveryDate = null;
     }
 
-    public Package(int id, String clientUsername, String courierUsername, String clientName, String warehouseAddress, String clientAddress, String size, Date deliveryDate) {
+    public Package(int id, String clientUsername, String courierUsername, String clientName, String warehouseAddress, String clientAddress, String size, Date deliveryDate, String status) {
         this.id = id;
         this.clientUsername = clientUsername;
         this.courierUsername = courierUsername;
@@ -37,6 +39,7 @@ public class Package implements Serializable {
         this.clientAddress = clientAddress;
         this.size = size;
         this.deliveryDate = deliveryDate;
+        this.status = status;
     }
 
     public int getId() {
@@ -71,28 +74,36 @@ public class Package implements Serializable {
         this.clientName = clientName;
     }
 
-    public String getWarehouseAdress() {
+    public String getWarehouseAddress() {
         return warehouseAddress;
     }
 
-    public void setWarehouseAdress(String warehouseAdress) {
-        this.warehouseAddress = warehouseAdress;
+    public void setWarehouseAddress(String warehouseAddress) {
+        this.warehouseAddress = warehouseAddress;
     }
 
-    public String getClientAdress() {
+    public String getClientAddress() {
         return clientAddress;
     }
 
-    public void setClientAdress(String clientAdress) {
-        this.clientAddress = clientAdress;
+    public void setClientAddress(String clientAddress) {
+        this.clientAddress = clientAddress;
     }
 
-    public String getPackageSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setPackageSize(String packageSize) {
-        this.size = packageSize;
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Date getDeliveryDate() {
