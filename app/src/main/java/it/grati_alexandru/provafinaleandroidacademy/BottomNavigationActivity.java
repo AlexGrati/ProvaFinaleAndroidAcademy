@@ -2,6 +2,7 @@ package it.grati_alexandru.provafinaleandroidacademy;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
@@ -11,10 +12,21 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v7.widget.Toolbar;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -38,19 +50,16 @@ import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
 public class BottomNavigationActivity extends AppCompatActivity  implements ResponseController{
 
-    private TextView mTextMessage;
+    //private Toolbar toolbar;
     private FragmentManager fragmentManager;
+    private SupportMapFragment supportMapFragment;
     private FragmentTransaction fragmentTransaction;
     private User user;
-    private LinearLayoutManager linearLayoutManager;
     private SharedPreferences sharedPreferences;
     private ResponseController responseController;
     private ProgressDialog progressDialog;
-    private Package aPackage;
-    private String savedUser;
     private List<Package> packageList;
     private String type;
-    private Context context;
     private Gson gson;
     private List<Courier> courierList;
 
@@ -60,13 +69,19 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             fragmentManager = getSupportFragmentManager();
+            supportMapFragment = SupportMapFragment.newInstance();
             fragmentTransaction = fragmentManager.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
                     return true;
                 case R.id.navigation_dashboard:
-                    checkCourierList();
+                    if(user instanceof Client)
+                        checkCourierList();
+                    else{
+                        supportMapFragment.getMapAsync(new MapFragmentActivity(getApplicationContext()));
+                        fragmentManager.beginTransaction().add(R.id.baseFrameLayout,supportMapFragment).commit();
+                    }
                     return true;
             }
             return false;
@@ -122,6 +137,8 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        //toolbar = (Toolbar) findViewById(R.id.toolbarID);
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         user = (User) FileOperations.readObject(getApplicationContext(),"USER");
         type = sharedPreferences.getString("TYPE","");
@@ -151,8 +168,12 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
                     String response = new String(responseBody);
                     tempPackageList = DataParser.createPackageListFromId(response, packageIdList);
                     tempPackageList.size();
+                    Log.i("TEST", ""+tempPackageList.get(0).getClientAddress() + " "+ tempPackageList.get(0).getWarehouseAddress());
                     user.setPackageList(tempPackageList);
                     FileOperations.writeObject(getApplicationContext(), "USER", user);
+                    fragmentManager = getSupportFragmentManager();
+                    fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
                 }
             }
 
@@ -195,13 +216,24 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
 
     @Override
     public void respondOnRecevedData() {
-        if(user == null){
-            fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
-        }
-
         if(progressDialog != null) {
             progressDialog.dismiss();
             progressDialog.cancel();
         }
     }
+/*
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_settings){
+            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onOptionsMenuClosed(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+    }
+    */
 }

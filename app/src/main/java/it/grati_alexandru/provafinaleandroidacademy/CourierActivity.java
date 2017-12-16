@@ -66,8 +66,8 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
             String packageUrl = FirebaseRestRequests.BASE_URL + "Packages";
             DatabaseReference databaseReference = firebaseDatabase.getReferenceFromUrl(packageUrl);
+            DatabaseReference databaseReferenceLastPackId = firebaseDatabase.getReferenceFromUrl(FirebaseRestRequests.BASE_URL);
             String id = setId(lastId);
-
             //insert into packages
             databaseReference.child(id).child("ClientName").setValue(savedUser.getFirstName() + " " + savedUser.getLastName());
             databaseReference.child(id).child("ClientUsername").setValue(savedUser.username);
@@ -78,6 +78,10 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
             databaseReference.child(id).child("CourierUsername").setValue(courierUsername);
             insertIntoUser("Clients", savedUser.getUsername());
             insertIntoUser("Couriers", courierUsername);
+
+            lastId++;
+            id = setId(lastId);
+            databaseReferenceLastPackId.child("LastPackageId").setValue(id);
             finish();
         }else{
             Toast.makeText(getApplicationContext(),warning, Toast.LENGTH_SHORT).show();
@@ -92,7 +96,9 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
 
         String userUrl = FirebaseRestRequests.BASE_URL+"Users/"+userType+"/"+username+"/Packages/";
         databaseReference = firebaseDatabase.getReferenceFromUrl(userUrl);
-        databaseReference.child(id).child("Status").setValue("Commissionato");
+        if(userType.equals("Clients")) {
+            databaseReference.child(id).child("Status").setValue("Commissionato");
+        }
         databaseReference.child(id).child("id").setValue(id);
         databaseReference.child("LastModDate").setValue(DateConversion.formatDateToString(new Date()));
     }
@@ -110,7 +116,7 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
             id++;
             return ("0"+id);
         }
-        return (""+id++);
+        return (""+id);
     }
 
     public int getPackageId(){

@@ -29,6 +29,7 @@ import it.grati_alexandru.provafinaleandroidacademy.Model.User;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.DataParser;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.DateConversion;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
+import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebasePush;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     private ResponseController responseController;
     private ProgressDialog progressDialog;
     private SharedPreferences.Editor editor;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         editor = sharedPreferences.edit();
 
         savedUser = sharedPreferences.getString("USER","");
-
         if(!savedUser.equals("")){
             loginUser();
         }
@@ -197,12 +198,19 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
                 responseController.respondOnRecevedData();
             }
         });
-
     }
 
     public void loginUser(){
         Intent intent = new Intent(getApplicationContext(),BottomNavigationActivity.class);
         startActivity(intent);
+        if(user == null){
+            User user = new User();
+            user.setUsername(username);
+        }
+        FileOperations.writeObject(getApplicationContext(),"User", user);
+        Intent serviceIntent = new Intent(getApplicationContext(), FirebasePush.class);
+        startService(serviceIntent);
+        finish();
     }
 
     public void registerUser(){
@@ -218,16 +226,14 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         databaseReference.child(username).child("LastName").setValue(lastName);
         databaseReference.child(username).child("Password").setValue(password);
 
-        User user;
         if(urlElem.equals("Clients")){
             user = new Client(firstName,lastName,username,password, new ArrayList<Package>());
         }else{
             user = new Courier(firstName,lastName,username,password, new ArrayList<Package>());
         }
-        editor.putString("USER",username);
-        editor.apply();
-        FileOperations.writeObject(getApplicationContext(),"USER",user);
+        saveUserToPreferences();
         loginUser();
+        finish();
     }
 
     public void saveUserToPreferences(){
@@ -238,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     public String setUrlElement(){
         View v = radioGroup;
         RadioButton radioButton = v.findViewById(chekedbuttonId);
-        String type = "";
+        String type;
         if(radioButton.getText().toString().equals("Client"))
             type = "Clients";
         else type = "Couriers";

@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "253773461362",
+    "firebase_url": "https://provafinaleandroidacademy.firebaseio.com",
+    "project_id": "provafinaleandroidacademy",
+    "storage_bucket": "provafinaleandroidacademy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253773461362:android:a736445eb8fef79d",
+        "android_client_info": {
+          "package_name": "it.grati_alexandru.provafinaleandroidacademy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "253773461362-ial5fnu5lapqjep4jcmdcqdug95aapo5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.grati_alexandru.provafinaleandroidacademy",
+            "certificate_hash": "8668e26a866b33305883d9252388ceeb68131306"
+          }
+        },
+        {
+          "client_id": "253773461362-a1jrl6e24v360utt36kck1pgov2sflpt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.grati_alexandru.provafinaleandroidacademy",
+            "certificate_hash": "6834ac82ec6b8d4e905d92e0985db40efa174bc9"
+          }
+        },
+        {
+          "client_id": "253773461362-re2l0nfkn476hgg8v49kjh3sjqtnuff6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxA5aCxKKb6bghGXtVRmHC5uaAT2wOh4A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "253773461362-re2l0nfkn476hgg8v49kjh3sjqtnuff6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

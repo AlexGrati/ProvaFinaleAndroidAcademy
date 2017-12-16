@@ -37,6 +37,7 @@ public class FirebasePush extends Service {
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private String url = FirebaseRestRequests.BASE_URL;
     private DatabaseReference usersReference = database.getReferenceFromUrl(url);
+    private SharedPreferences.Editor editor;
     private ChildEventListener handler;
 
     @Nullable
@@ -66,6 +67,7 @@ public class FirebasePush extends Service {
         final String type = sharedPreferences.getString("TYPE","");
         url = url +"/Users/"+type+"/"+ username + "/Packages";
         usersReference = database.getReferenceFromUrl(url);
+        editor = sharedPreferences.edit();
 
         handler = new ChildEventListener() {
 
@@ -73,6 +75,8 @@ public class FirebasePush extends Service {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.i("FIREBASE_SERVICE", "ADD: " + dataSnapshot.getKey());
                 if(type.equals("Couriers") && dataSnapshot.exists()){
+                    editor.putString("PACKAGE_ID",dataSnapshot.getKey());
+                    editor.apply();
                     activePushValidation(""+dataSnapshot.getKey(), "Child Added");
                 }
             }
@@ -81,6 +85,8 @@ public class FirebasePush extends Service {
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Log.i("FIREBASE_SERVICE", "CHANGE: " + dataSnapshot.getKey());
                 if (type.equals("Clients") && dataSnapshot.exists()) {
+                    editor.putString("PACKAGE_ID",dataSnapshot.getKey());
+                    editor.apply();
                     activePushValidation(""+dataSnapshot.getKey(), "Child Modified");
                 }
             }

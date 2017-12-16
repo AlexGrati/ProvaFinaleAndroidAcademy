@@ -30,7 +30,7 @@ public class Package implements Serializable {
         this.deliveryDate = null;
     }
 
-    public Package(int id, String clientUsername, String courierUsername, String clientName, String warehouseAddress, String clientAddress, String size, Date deliveryDate, String status) {
+    public Package(int id, String clientUsername, String clientName, String warehouseAddress, String clientAddress, String size, Date deliveryDate, String status) {
         this.id = id;
         this.clientUsername = clientUsername;
         this.courierUsername = courierUsername;

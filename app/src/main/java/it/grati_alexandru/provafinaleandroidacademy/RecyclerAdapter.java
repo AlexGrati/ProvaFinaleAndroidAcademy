@@ -5,6 +5,8 @@ import it.grati_alexandru.provafinaleandroidacademy.Utils.DateConversion;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -44,7 +46,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.CardHo
                 public void onClick(View v) {
                     Intent intent = new Intent(context,PackageActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("PACKAGE_ID",tPackId.getText().toString());
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("PACKAGE_ID",tPackId.getText().toString());
+                    editor.apply();
                     context.startActivity(intent);
                 }
             });

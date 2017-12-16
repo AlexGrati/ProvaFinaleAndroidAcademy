@@ -83,4 +83,8 @@ public class User implements Serializable {
         }
         return  null;
     }
+    public void modifyPackStatus(Package p){
+        Package pack = findPackageById(p.getId());
+        pack.setStatus(p.getStatus());
+    }
 }

@@ -77,49 +77,58 @@ public class DataParser {
             while(iterator.hasNext()){
                 String key = (String) iterator.next();
                 key = parseString(key);
-                JSONObject pack = packageObject.getJSONObject(key);
-                Iterator packageIterator = pack.keys();
-                Package p = new Package();
-                while (packageIterator.hasNext()) {
-                    String data = (String) packageIterator.next();
-                    String val = pack.getString(data);
-                    switch (data){
-                        case "ClientName":
-                            p.setClientName(val);
-                            break;
-                        case "ClientUsername":
-                            p.setClientUsername(val);
-                            break;
-                        case "CourierUsername":
-                            p.setCourierUsername(val);
-                            break;
-                        case "DeliveryAddres":
-                            p.setClientAddress(val);
-                            break;
-                        case "DeliveryDate":
-                            p.setDeliveryDate(DateConversion.formatStringToDate(val));
-                            break;
-                        case "Size":
-                            p.setSize(val);
-                            break;
-                        case "Status":
-                            p.setStatus(val);
-                            break;
-                        case "WarehouseAddress":
-                            p.setWarehouseAddress(val);
-                            break;
+                int id = Integer.parseInt(key);
+                if(isContained(id,idList)) {
+                    JSONObject pack = packageObject.getJSONObject(key);
+                    Iterator packageIterator = pack.keys();
+                    Package p = new Package();
+                    while (packageIterator.hasNext()) {
+                        String data = (String) packageIterator.next();
+                        String val = pack.getString(data);
+                        switch (data) {
+                            case "ClientName":
+                                p.setClientName(val);
+                                break;
+                            case "ClientUsername":
+                                p.setClientUsername(val);
+                                break;
+                            case "DeliveryAddress":
+                                p.setClientAddress(val);
+                                break;
+                            case "DeliveryDate":
+                                p.setDeliveryDate(DateConversion.formatStringToDate(val));
+                                break;
+                            case "Size":
+                                p.setSize(val);
+                                break;
+                            case "Status":
+                                p.setStatus(val);
+                                break;
+                            case "WarehouseAddress":
+                                p.setWarehouseAddress(val);
+                                break;
+                        }
+                        if (p.getId() == 0) {
+
+                            p.setId(id);
+                        }
                     }
-                    if(p.getId() == 0){
-                        int id = Integer.parseInt(key);
-                        p.setId(id);
-                    }
+                    packageList.add(p);
                 }
-                packageList.add(p);
             }
         }catch (JSONException e){
             e.printStackTrace();
         }
         return  packageList;
+    }
+
+    public static boolean isContained(int id, List<Integer> integerList){
+        for (Integer i : integerList){
+            if(id == i){
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String parseString(String string){
