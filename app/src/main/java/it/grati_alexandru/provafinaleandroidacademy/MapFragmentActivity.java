@@ -1,14 +1,25 @@
 package it.grati_alexandru.provafinaleandroidacademy;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -49,15 +60,31 @@ public class MapFragmentActivity extends FragmentActivity implements OnMapReadyC
         String d = "Piazza del Duomo, 20122 Milano MI";
         mMap = googleMap;
         LatLng milan = Geodecode.getLocationFromAddress(context,d);
-        mMap.addMarker(new MarkerOptions().position(milan).title("Marker in Duomo"));
+        mMap.addMarker(new MarkerOptions().position(milan).title("Marker in Duomo").icon(BitmapDescriptorFactory.fromBitmap((getBitmapFromVectorDrawable(context,R.drawable.truck_delivery)))));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(milan));
+
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+
         googleMap.getUiSettings().setZoomGesturesEnabled(true);
         CameraPosition cameraPosition = new CameraPosition.Builder().target(milan).zoom(14.0f).build();
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
         googleMap.moveCamera(cameraUpdate);
+    }
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 }

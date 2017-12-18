@@ -111,7 +111,7 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
     public void onModifyStatusButtonClicked(View v){
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         String packId = setPackId(pack.getId());
-        String url = FirebaseRestRequests.BASE_URL + "Users/Clients/" + pack.getClientUsername()+"Packages/"+ packId;
+        String url = FirebaseRestRequests.BASE_URL + "Users/Clients/" + pack.getClientUsername()+"/Packages/"+ packId;
         String urlPackage = FirebaseRestRequests.BASE_URL + "Packages/";
         DatabaseReference databaseReference = firebaseDatabase.getReferenceFromUrl(url);
         DatabaseReference databasePackageReference = firebaseDatabase.getReferenceFromUrl(urlPackage);
@@ -120,13 +120,13 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
             case "Confirma":
                 databaseReference.child("Status").setValue("Confirmato");
                 databaseReference.child("id").setValue(packId);
-                databasePackageReference.child("id").child("Status").setValue("Confirmato");
+                databasePackageReference.child(packId).child("Status").setValue("Confirmato");
                 pack.setStatus("Confirmato");
                 break;
             case "Ritira":
                 databaseReference.child("Status").setValue("Ritirato");
                 databaseReference.child("id").setValue(packId);
-                databasePackageReference.child("id").child("Status").setValue("Ritirato");
+                databasePackageReference.child(packId).child("Status").setValue("Ritirato");
                 pack.setStatus("Ritirato");
                 break;
         }

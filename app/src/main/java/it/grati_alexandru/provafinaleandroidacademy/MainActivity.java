@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     private ProgressDialog progressDialog;
     private SharedPreferences.Editor editor;
     private User user;
+    private String type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         progressDialog = new ProgressDialog(MainActivity.this);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
+
+        user = (User) FileOperations.readObject(getApplicationContext(), "USER");
 
         savedUser = sharedPreferences.getString("USER","");
         if(!savedUser.equals("")){
@@ -204,10 +208,13 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         Intent intent = new Intent(getApplicationContext(),BottomNavigationActivity.class);
         startActivity(intent);
         if(user == null){
-            User user = new User();
+            setUrlElement();
+            if(type.equals("Couriers"))
+                user = new Courier();
+            else user = new Client();
             user.setUsername(username);
         }
-        FileOperations.writeObject(getApplicationContext(),"User", user);
+        FileOperations.writeObject(getApplicationContext(),"USER", user);
         Intent serviceIntent = new Intent(getApplicationContext(), FirebasePush.class);
         startService(serviceIntent);
         finish();
@@ -233,7 +240,6 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         }
         saveUserToPreferences();
         loginUser();
-        finish();
     }
 
     public void saveUserToPreferences(){
@@ -244,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     public String setUrlElement(){
         View v = radioGroup;
         RadioButton radioButton = v.findViewById(chekedbuttonId);
-        String type;
         if(radioButton.getText().toString().equals("Client"))
             type = "Clients";
         else type = "Couriers";

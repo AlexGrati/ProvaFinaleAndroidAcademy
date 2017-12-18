@@ -61,7 +61,7 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
         if(!hasEmptyFields){
             progressDialog.setTitle("Loading Data...");
             progressDialog.show();
-            getPackageId();
+            lastId = getPackageId();
 
             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
             String packageUrl = FirebaseRestRequests.BASE_URL + "Packages";
@@ -70,7 +70,7 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
             String id = setId(lastId);
             //insert into packages
             databaseReference.child(id).child("ClientName").setValue(savedUser.getFirstName() + " " + savedUser.getLastName());
-            databaseReference.child(id).child("ClientUsername").setValue(savedUser.username);
+            databaseReference.child(id).child("ClientUsername").setValue(savedUser.getUsername());
             databaseReference.child(id).child("DeliveryAddress").setValue(deliveryAddress.getText().toString());
             databaseReference.child(id).child("WarehouseAddress").setValue(warehouseAddress.getText().toString());
             databaseReference.child(id).child("Status").setValue("Commissionato");

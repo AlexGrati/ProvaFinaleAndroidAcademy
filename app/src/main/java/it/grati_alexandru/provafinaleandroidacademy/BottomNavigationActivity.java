@@ -151,11 +151,17 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
             fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
         }else {
-            if(type.equals("Couriers"))
+            /*if(type.equals("Couriers"))
                 user = new Courier();
-            else user = new Client();
+            else user = new Client();*/
             getPackagesFormFirebase();
         }
+    }
+
+   @Override
+    public void onResume(){
+        super.onResume();
+        getPackagesFormFirebase();
     }
 
     public void createPackageListFromId(final List<Integer> packageIdList){
