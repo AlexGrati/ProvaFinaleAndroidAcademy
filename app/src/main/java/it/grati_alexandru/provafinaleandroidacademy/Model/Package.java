@@ -3,11 +3,18 @@ package it.grati_alexandru.provafinaleandroidacademy.Model;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.sql.StatementEvent;
+
 /**
  * Created by utente4.academy on 14/12/2017.
  */
 
 public class Package implements Serializable {
+
+    public static String STATUS_COMMISSIONATO = "Commissionato";
+    public static String STATUS_CONFERMATO = "Confermato";
+    public static String STATUS_RITIRATO = "Ritirato";
+
     private int id;
     private String clientUsername;
     private String courierUsername;

@@ -23,6 +23,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import it.grati_alexandru.provafinaleandroidacademy.BottomNavigationActivity;
 import it.grati_alexandru.provafinaleandroidacademy.MainActivity;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Courier;
 import it.grati_alexandru.provafinaleandroidacademy.PackageActivity;
@@ -77,7 +79,7 @@ public class FirebasePush extends Service {
                 if(type.equals("Couriers") && dataSnapshot.exists()){
                     editor.putString("PACKAGE_ID",dataSnapshot.getKey());
                     editor.apply();
-                    activePushValidation(""+dataSnapshot.getKey(), "Child Added");
+                    activePushValidation(""+dataSnapshot.getKey(), "Child Added", BottomNavigationActivity.class);
                 }
             }
 
@@ -87,7 +89,7 @@ public class FirebasePush extends Service {
                 if (type.equals("Clients") && dataSnapshot.exists()) {
                     editor.putString("PACKAGE_ID",dataSnapshot.getKey());
                     editor.apply();
-                    activePushValidation(""+dataSnapshot.getKey(), "Child Modified");
+                    activePushValidation(""+dataSnapshot.getKey(), "Child Modified", PackageActivity.class);
                 }
             }
 
@@ -111,8 +113,8 @@ public class FirebasePush extends Service {
         usersReference.addChildEventListener(handler);
     }
 
-    public void activePushValidation(String commListener, String text) {
-        Intent intent = new Intent(this, PackageActivity.class);
+    public void activePushValidation(String commListener, String text, Class c) {
+        Intent intent = new Intent(this,c);
         sendNotification(intent, text, commListener);
     }
 

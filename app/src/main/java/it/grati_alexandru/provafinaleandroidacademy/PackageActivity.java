@@ -1,12 +1,15 @@
 package it.grati_alexandru.provafinaleandroidacademy;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -28,6 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.grati_alexandru.provafinaleandroidacademy.Fragments.PackageFragment;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Client;
 import it.grati_alexandru.provafinaleandroidacademy.Model.User;
 import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
@@ -35,6 +39,11 @@ import it.grati_alexandru.provafinaleandroidacademy.Utils.DateConversion;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.Geodecode;
+
+import static it.grati_alexandru.provafinaleandroidacademy.Model.Package.STATUS_COMMISSIONATO;
+import static it.grati_alexandru.provafinaleandroidacademy.Model.Package.STATUS_CONFERMATO;
+import static it.grati_alexandru.provafinaleandroidacademy.Model.Package.STATUS_RITIRATO;
+import static it.grati_alexandru.provafinaleandroidacademy.Model.User.USER;
 
 public class PackageActivity extends AppCompatActivity implements OnMapReadyCallback {
     private TextView clientName;
@@ -66,7 +75,7 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
         bModifyStatus = findViewById(R.id.buttonModifyStatus);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        user = (User) FileOperations.readObject(getApplicationContext(),"USER");
+        user = (User) FileOperations.readObject(getApplicationContext(), USER);
 
         int id = Integer.parseInt(sharedPreferences.getString("PACKAGE_ID", "-1"));
         pack = user.findPackageById(id);
@@ -88,23 +97,27 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
         fragmentManager.beginTransaction().add(R.id.packMapContainer,mapFragment).commit();
 
         if(user instanceof Client){
-            if (pack.getStatus().equals("Commissionato")){
+            if (pack.getStatus().equals(STATUS_COMMISSIONATO)){
                 bModifyStatus.setVisibility(View.INVISIBLE);
             }
-            if(pack.getStatus().equals("Ritirato")){
-                bModifyStatus.setText("Confirma");
+            if(pack.getStatus().equals(STATUS_RITIRATO)){
+                bModifyStatus.setText("Conferma");
             }
         }else{
-            if (pack.getStatus().equals("Commissionato")){
+            if (pack.getStatus().equals(STATUS_COMMISSIONATO)){
                 bModifyStatus.setText("Ritira");
             }
-            if(pack.getStatus().equals("Ritirato")){
+            if(pack.getStatus().equals(STATUS_RITIRATO)){
                 bModifyStatus.setVisibility(View.INVISIBLE);
             }
         }
-        if(pack.getStatus().equals("Confirmato")){
+        if(pack.getStatus().equals(STATUS_CONFERMATO)){
             bModifyStatus.setVisibility(View.INVISIBLE);
         }
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("BACK_FROM_TAB","HOME");
+        editor.apply();
 
     }
 
@@ -117,21 +130,21 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
         DatabaseReference databasePackageReference = firebaseDatabase.getReferenceFromUrl(urlPackage);
         String bText = bModifyStatus.getText().toString();
         switch (bText){
-            case "Confirma":
-                databaseReference.child("Status").setValue("Confirmato");
+            case "Conferma":
+                databaseReference.child("Status").setValue(STATUS_CONFERMATO);
                 databaseReference.child("id").setValue(packId);
-                databasePackageReference.child(packId).child("Status").setValue("Confirmato");
-                pack.setStatus("Confirmato");
+                databasePackageReference.child(packId).child("Status").setValue(STATUS_CONFERMATO);
+                pack.setStatus(STATUS_CONFERMATO);
                 break;
             case "Ritira":
-                databaseReference.child("Status").setValue("Ritirato");
+                databaseReference.child("Status").setValue(STATUS_RITIRATO);
                 databaseReference.child("id").setValue(packId);
-                databasePackageReference.child(packId).child("Status").setValue("Ritirato");
-                pack.setStatus("Ritirato");
+                databasePackageReference.child(packId).child("Status").setValue(STATUS_RITIRATO);
+                pack.setStatus(STATUS_RITIRATO);
                 break;
         }
         user.modifyPackStatus(pack);
-        FileOperations.writeObject(getApplicationContext(),"USER",user);
+        FileOperations.writeObject(getApplicationContext(),USER,user);
         finish();
     }
 
@@ -150,5 +163,20 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
             return "0"+id;
         }
         return  ""+id;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_settings){
+            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onOptionsMenuClosed(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
     }
 }

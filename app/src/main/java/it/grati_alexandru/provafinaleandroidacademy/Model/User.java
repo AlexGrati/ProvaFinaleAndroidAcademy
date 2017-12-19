@@ -9,6 +9,10 @@ import java.util.List;
  */
 
 public class User implements Serializable {
+    public static String USER = "USER";
+    public static String COURIERS = "Couriers";
+    public static String CLIENTS = "Clients";
+
     public String firstName;
     public String lastName;
     public String username;

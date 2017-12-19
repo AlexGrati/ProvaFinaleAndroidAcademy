@@ -31,6 +31,8 @@ public class MapFragmentActivity extends FragmentActivity implements OnMapReadyC
     private GoogleMap mMap;
     private Context context;
 
+    public  MapFragmentActivity(){}
+
     public MapFragmentActivity(Context context){
         this.context = context;
     }
@@ -60,7 +62,8 @@ public class MapFragmentActivity extends FragmentActivity implements OnMapReadyC
         String d = "Piazza del Duomo, 20122 Milano MI";
         mMap = googleMap;
         LatLng milan = Geodecode.getLocationFromAddress(context,d);
-        mMap.addMarker(new MarkerOptions().position(milan).title("Marker in Duomo").icon(BitmapDescriptorFactory.fromBitmap((getBitmapFromVectorDrawable(context,R.drawable.truck_delivery)))));
+        mMap.addMarker(new MarkerOptions().position(milan).title("Marker in Duomo")
+                .icon(BitmapDescriptorFactory.fromBitmap((getBitmapFromVectorDrawable(context,R.drawable.truck_delivery)))));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(milan));
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -82,6 +85,7 @@ public class MapFragmentActivity extends FragmentActivity implements OnMapReadyC
 
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);

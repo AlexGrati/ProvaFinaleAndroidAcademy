@@ -34,6 +34,8 @@ import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebasePush;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
+import static it.grati_alexandru.provafinaleandroidacademy.Model.User.USER;
+
 public class MainActivity extends AppCompatActivity implements ResponseController {
     private TextView editTextFirstName;
     private TextView editTextLastName;
@@ -75,9 +77,9 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
 
-        user = (User) FileOperations.readObject(getApplicationContext(), "USER");
+        user = (User) FileOperations.readObject(getApplicationContext(), USER);
 
-        savedUser = sharedPreferences.getString("USER","");
+        savedUser = sharedPreferences.getString(USER,"");
         if(!savedUser.equals("")){
             loginUser();
         }
@@ -118,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
                 progressDialog.show();
                 registerUser();
                 responseController.respondOnRecevedData();
-                Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
             }else{
                 Toast.makeText(getApplicationContext(), warning, Toast.LENGTH_SHORT).show();
             }
@@ -209,12 +210,12 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         startActivity(intent);
         if(user == null){
             setUrlElement();
-            if(type.equals("Couriers"))
+            if(type.equals(User.COURIERS))
                 user = new Courier();
             else user = new Client();
             user.setUsername(username);
         }
-        FileOperations.writeObject(getApplicationContext(),"USER", user);
+        FileOperations.writeObject(getApplicationContext(), USER, user);
         Intent serviceIntent = new Intent(getApplicationContext(), FirebasePush.class);
         startService(serviceIntent);
         finish();
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         databaseReference.child(username).child("LastName").setValue(lastName);
         databaseReference.child(username).child("Password").setValue(password);
 
-        if(urlElem.equals("Clients")){
+        if(urlElem.equals(User.CLIENTS)){
             user = new Client(firstName,lastName,username,password, new ArrayList<Package>());
         }else{
             user = new Courier(firstName,lastName,username,password, new ArrayList<Package>());
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
     }
 
     public void saveUserToPreferences(){
-        editor.putString("USER",username);
+        editor.putString(USER,username);
         editor.apply();
     }
 
@@ -251,8 +252,8 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         View v = radioGroup;
         RadioButton radioButton = v.findViewById(chekedbuttonId);
         if(radioButton.getText().toString().equals("Client"))
-            type = "Clients";
-        else type = "Couriers";
+            type = User.CLIENTS;
+        else type = User.COURIERS;
         editor.putString("TYPE",type);
         editor.apply();
         return type;

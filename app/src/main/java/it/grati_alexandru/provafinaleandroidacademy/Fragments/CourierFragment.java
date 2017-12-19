@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -34,7 +35,7 @@ import it.grati_alexandru.provafinaleandroidacademy.RecyclerAdapter;
  * Use the {@link CourierFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CourierFragment extends Fragment {
+public class CourierFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -46,6 +47,7 @@ public class CourierFragment extends Fragment {
     private SharedPreferences sharedPreferences;
     private Gson gson;
     private List<Courier> courierList;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -88,7 +90,6 @@ public class CourierFragment extends Fragment {
         String json = sharedPreferences.getString("COURIER_LIST","");
         Type type = new TypeToken<List<Courier>>(){}.getType();
         courierList = gson.fromJson(json,type);
-        Log.i("TAG", "1 "+courierList.size());
     }
 
     @Override
@@ -97,14 +98,15 @@ public class CourierFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_courier, container, false);
 
-        Log.i("TAG", "1 "+courierList.size());
-
         recyclerView = view.findViewById(R.id.rViewCourier);
         linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
 
         recyclerAdapter = new CourierRecyclerAdapter(getContext(), courierList);
         recyclerView.setAdapter(recyclerAdapter);
+        swipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swipe);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorScheme(R.color.colorPrimaryDark);
         return  view;
     }
 
@@ -144,5 +146,10 @@ public class CourierFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onRefresh(){
+
     }
 }

@@ -17,12 +17,15 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
+import it.grati_alexandru.provafinaleandroidacademy.Model.Package;
 import it.grati_alexandru.provafinaleandroidacademy.Model.User;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.DataParser;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.DateConversion;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
+
+import static it.grati_alexandru.provafinaleandroidacademy.Model.User.USER;
 
 public class CourierActivity extends AppCompatActivity implements ResponseController {
     private TextView warehouseAddress;
@@ -35,7 +38,7 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
     private SharedPreferences sharedPreferences;
     private ResponseController responseController;
     private ProgressDialog progressDialog;
-    private User savedUser;
+    private User user;
     private String courierUsername;
     private String type;
 
@@ -51,9 +54,12 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
         responseController = this;
         progressDialog = new ProgressDialog(CourierActivity.this);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        savedUser = (User) FileOperations.readObject(getApplicationContext(),"USER");
+        user = (User) FileOperations.readObject(getApplicationContext(),"USER");
         courierUsername = getIntent().getStringExtra("COURIER_USERNAME");
         type = sharedPreferences.getString("TYPE","");
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("BACK_FROM_TAB","DASHBOARD");
+        editor.apply();
     }
 
     public void onPlaceButtonClicked(View v){
@@ -68,20 +74,35 @@ public class CourierActivity extends AppCompatActivity implements ResponseContro
             DatabaseReference databaseReference = firebaseDatabase.getReferenceFromUrl(packageUrl);
             DatabaseReference databaseReferenceLastPackId = firebaseDatabase.getReferenceFromUrl(FirebaseRestRequests.BASE_URL);
             String id = setId(lastId);
+
+            Package pack = new Package();
+            pack.setId(lastId);
+            pack.setStatus(Package.STATUS_COMMISSIONATO);
+            pack.setClientUsername(user.getUsername());
+            pack.setCourierUsername(courierUsername);
+            pack.setDeliveryDate(DateConversion.formatStringToDate(deliveryDate.getText().toString()));
+            pack.setWarehouseAddress(warehouseAddress.getText().toString());
+            pack.setClientAddress(deliveryAddress.getText().toString());
+            pack.setClientName(user.getFirstName() + " " + user.getLastName());
+            pack.setSize(spinnerSize.getSelectedItem().toString());
+
             //insert into packages
-            databaseReference.child(id).child("ClientName").setValue(savedUser.getFirstName() + " " + savedUser.getLastName());
-            databaseReference.child(id).child("ClientUsername").setValue(savedUser.getUsername());
-            databaseReference.child(id).child("DeliveryAddress").setValue(deliveryAddress.getText().toString());
-            databaseReference.child(id).child("WarehouseAddress").setValue(warehouseAddress.getText().toString());
-            databaseReference.child(id).child("Status").setValue("Commissionato");
+            databaseReference.child(id).child("ClientName").setValue(pack.getClientName());
+            databaseReference.child(id).child("ClientUsername").setValue(pack.getClientUsername());
+            databaseReference.child(id).child("DeliveryAddress").setValue(pack.getClientAddress());
+            databaseReference.child(id).child("WarehouseAddress").setValue(pack.getWarehouseAddress());
+            databaseReference.child(id).child("Status").setValue(pack.getStatus());
+            databaseReference.child(id).child("Size").setValue(pack.getSize());
             databaseReference.child(id).child("DeliveryDate").setValue("00:00 "+deliveryDate.getText().toString());
             databaseReference.child(id).child("CourierUsername").setValue(courierUsername);
-            insertIntoUser("Clients", savedUser.getUsername());
+            insertIntoUser("Clients", user.getUsername());
             insertIntoUser("Couriers", courierUsername);
 
             lastId++;
             id = setId(lastId);
             databaseReferenceLastPackId.child("LastPackageId").setValue(id);
+            user.modifyPackStatus(pack);
+            FileOperations.writeObject(getApplicationContext(),USER,user);
             finish();
         }else{
             Toast.makeText(getApplicationContext(),warning, Toast.LENGTH_SHORT).show();

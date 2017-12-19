@@ -2,6 +2,7 @@ package it.grati_alexandru.provafinaleandroidacademy.Fragments;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,10 @@ import it.grati_alexandru.provafinaleandroidacademy.Utils.FileOperations;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.FirebaseRestRequests;
 import it.grati_alexandru.provafinaleandroidacademy.Utils.ResponseController;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+import static it.grati_alexandru.provafinaleandroidacademy.Model.User.USER;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -56,12 +61,14 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
     private String savedUser;
     private List<Package> packageList;
     private String type;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
 
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -109,6 +116,10 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
         recyclerAdapter = new RecyclerAdapter(getContext(),  user.getPackageList());
         recyclerView.setAdapter(recyclerAdapter);
 
+        swipeRefreshLayout = (SwipeRefreshLayout)view.findViewById(R.id.swipe_container);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorScheme(R.color.colorPrimaryDark);
+
         // Inflate the layout for this fragment
         return  view;
     }
@@ -125,8 +136,6 @@ public class PackageFragment extends Fragment implements SwipeRefreshLayout.OnRe
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
-        } else {
-            Toast.makeText(getContext(), "PackageFragment", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -55,6 +55,9 @@ public class DataParser {
                             case  "LastName":
                                 c.setLastName(val);
                                 break;
+                            case "Password":
+                                c.setPassword(val);
+                                break;
                         }
 
                         if(c.getUsername() == null){
