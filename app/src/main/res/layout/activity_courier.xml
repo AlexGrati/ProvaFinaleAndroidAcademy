@@ -38,7 +38,7 @@
         android:layout_centerHorizontal="true"
         android:ems="10"
         android:hint="Delivery Date"
-        android:inputType="textPersonName" />
+        android:inputType="datetime" />
 
     <Spinner
         android:id="@+id/spinnerSizeId"

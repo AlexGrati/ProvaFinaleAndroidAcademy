@@ -136,6 +136,7 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
             fragmentManager = getSupportFragmentManager();
             fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.baseFrameLayout,new PackageFragment()).commit();
+            //navigation.getMenu().getItem(1).setChecked(true);
         }else {
             getPackagesFormFirebase();
         }
@@ -186,7 +187,7 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
     public void getPackagesFormFirebase(){
         progressDialog.setTitle("Loading Data..");
         progressDialog.show();
-        String username = sharedPreferences.getString(User.USER, "");
+        String username = user.getUsername();
         String url = "Users/" + type + "/" + username + "/Packages";
         FirebaseRestRequests.get(url, null, new AsyncHttpResponseHandler() {
             @Override
@@ -196,7 +197,6 @@ public class BottomNavigationActivity extends AppCompatActivity  implements Resp
                     List<Integer> packageListId = DataParser.getPackagesId(response);
                     packageListId.size();
                     createPackageListFromId(packageListId);
-                    Toast.makeText(getApplicationContext(), "Loading Done", Toast.LENGTH_SHORT).show();
                 }
                 responseController.respondOnRecevedData();
             }

@@ -79,8 +79,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
 
         user = (User) FileOperations.readObject(getApplicationContext(), USER);
 
-        savedUser = sharedPreferences.getString(USER,"");
-        if(!savedUser.equals("")){
+        if(user != null && !user.getUsername().equals("")){
             loginUser();
         }
     }
@@ -182,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
                     if(!response.equals("null")){
                         response = DataParser.parseString(response);
                         if(response.equals(password)){
-                            saveUserToPreferences();
                             loginUser();
                             Toast.makeText(getApplicationContext(), "Welcome", Toast.LENGTH_SHORT).show();
                         }else {
@@ -239,13 +237,7 @@ public class MainActivity extends AppCompatActivity implements ResponseControlle
         }else{
             user = new Courier(firstName,lastName,username,password, new ArrayList<Package>());
         }
-        saveUserToPreferences();
         loginUser();
-    }
-
-    public void saveUserToPreferences(){
-        editor.putString(USER,username);
-        editor.apply();
     }
 
     public String setUrlElement(){

@@ -22,7 +22,9 @@
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait">
         <service android:name=".Utils.FirebasePush"/>
-        <activity android:name=".MainActivity">
+        <activity android:name=".SplashActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,10 +33,17 @@
         </activity>
         <activity
             android:name=".BottomNavigationActivity"
-            android:label="@string/title_activity_bottom_navigation" />
-        <activity android:name=".PackageActivity" />
-        <activity android:name=".CourierActivity" />
-        <activity android:name=".SplashActivity" />
+            android:label="@string/title_activity_bottom_navigation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".PackageActivity"
+            android:label="Order Status"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".CourierActivity"
+            android:label="Palce an Order"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".MainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:screenOrientation="portrait"/>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

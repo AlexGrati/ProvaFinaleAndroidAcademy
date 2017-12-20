@@ -11,9 +11,8 @@
         android:id="@+id/relativeLayout2"
         android:layout_width="wrap_content"
         android:layout_height="180dp"
-        android:layout_below="@+id/radioGroup"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp">
+        android:layout_centerVertical="true">
 
         <EditText
             android:id="@+id/editTextFirstName"
@@ -111,23 +110,22 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="80dp"
         android:orientation="horizontal"
         android:visibility="visible">
 
         <RadioButton
             android:id="@+id/rButtonClient"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Courier" />
 
         <RadioButton
             android:id="@+id/rButtonCourier"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Client" />
-
     </RadioGroup>
 </RelativeLayout>

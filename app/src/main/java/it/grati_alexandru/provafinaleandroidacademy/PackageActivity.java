@@ -170,13 +170,19 @@ public class PackageActivity extends AppCompatActivity implements OnMapReadyCall
         int id = item.getItemId();
         if(id == R.id.action_settings){
             Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+            user = null;
+            FileOperations.writeObject(getApplicationContext(),User.USER,user);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onOptionsMenuClosed(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
     }
 }
